@@ -9,7 +9,6 @@ Interactive web lesson for **Placement for EDA** (`learn_placement`), introducin
 ```text
 congestion_l3/
 ├── README.md                     # Module documentation (this file)
-├── README.txt                    # Plain-text notes
 ├── index.html                    # Main interactive lesson page (root entry)
 ├── player.html                   # Standalone video + WebVTT player
 ├── serve.py                      # Local HTTP development server
