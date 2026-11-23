@@ -1,0 +1,1976 @@
+<!doctype html>
+<html lang="en" data-asset-base="../../../../assets/">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Congestion: Supply and Load</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #E9F7FF;
+      --card: #FFFFFF;
+      --ink: #1F2A5A;
+      --soft: #5C6B9C;
+      --line: #DCE7FF;
+      --pink: #FF5C93;
+      --blue: #3D7BFF;
+      --green: #2BBF7E;
+      --amber: #FFB300;
+      --purple: #9B5DFF;
+      --shadow: 0 12px 30px rgba(31, 42, 90, 0.10);
+      --r: 22px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #CBEBFF 0%, #EEF9FF 45%, #FFF7DC 100%);
+      min-height: 100vh;
+    }
+    h1, h2, h3 { font-family: 'Fredoka', system-ui, sans-serif; letter-spacing: -0.01em; }
+    code { font-family: 'JetBrains Mono', monospace; }
+
+    /* Native WebVTT Cue Auto-Sizing & Styling */
+    video::cue {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: clamp(15px, 2.6vh, 28px);
+      font-weight: 600;
+      line-height: 1.35;
+      color: #FFFFFF;
+      background: rgba(18, 25, 56, 0.84);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Header */
+    .site-header {
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .header-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .brand {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--ink);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .badge-star {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink), var(--amber));
+      color: #fff;
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.9rem;
+    }
+    .nav-links { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--soft);
+      font-weight: 700;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+    }
+    .nav-links a:hover { background: #F1F6FF; color: var(--ink); }
+    .lang-switch { display: flex; background: #EEF3FF; padding: 3px; border-radius: 999px; }
+    .lang-switch button {
+      border: 0;
+      background: transparent;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--soft);
+    }
+    .lang-switch button[aria-selected="true"] {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 2px 6px rgba(31, 42, 90, 0.12);
+    }
+
+    main { max-width: 1140px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+
+    /* Hero */
+    .hero {
+      background: var(--card);
+      border: 3px solid var(--line);
+      border-radius: 28px;
+      padding: 1.75rem 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    .eyebrow {
+      display: inline-block;
+      background: #FFE5EF;
+      color: var(--pink);
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 0.6rem;
+    }
+    .hero h1 { margin: 0.2rem 0 0.6rem; font-size: clamp(1.95rem, 4vw, 2.85rem); }
+    .grad-text { color: var(--pink); }
+    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+      .grad-text {
+        background: linear-gradient(90deg, var(--pink), #FF8E3C, var(--purple));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+    }
+    .lead { color: var(--soft); font-size: 1.02rem; line-height: 1.6; max-width: 76ch; }
+    .formula-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .formula-chip {
+      background: #F4F8FF;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      padding: 0.45rem 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* Cards & Buttons */
+    .card {
+      background: var(--card);
+      border: 3px solid var(--line);
+      border-radius: var(--r);
+      padding: 1.35rem 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.6rem 1.15rem;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn:active:not(:disabled) { transform: translateY(0); }
+    .btn:disabled { opacity: 0.48; cursor: not-allowed; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-pink { background: var(--pink); color: #fff; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-amber { background: var(--amber); color: var(--ink); }
+    .btn-purple { background: var(--purple); color: #fff; }
+    .btn-ghost { background: #EEF4FF; color: var(--ink); }
+    .btn-sm { padding: 0.44rem 0.92rem; font-size: 0.85rem; }
+
+    /* Video Stage & Compulsory On-Video Pop-Up Quiz Overlay */
+    .video-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .video-stage {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 3px solid var(--line);
+      background: #0F172A;
+    }
+    .video-stage:fullscreen {
+      border: 0;
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+    .video-stage video {
+      width: 100%;
+      max-height: 100%;
+      display: block;
+      background: #0F172A;
+    }
+
+    /* Compulsory Overlay Modal directly on top of the video frame */
+    .video-quiz-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 25;
+      background: rgba(15, 23, 42, 0.64);
+      backdrop-filter: blur(5px);
+      display: grid;
+      place-items: center;
+      padding: clamp(0.65rem, 2vw, 1.5rem);
+      overflow-y: auto;
+    }
+    .video-quiz-overlay[hidden] {
+      display: none !important;
+    }
+    .vq-modal {
+      width: min(640px, 96%);
+      max-height: 94%;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.98);
+      border: 3px solid var(--pink);
+      border-radius: 22px;
+      padding: clamp(0.95rem, 2vw, 1.35rem);
+      box-shadow: 0 22px 54px rgba(15, 23, 42, 0.5);
+      animation: modalPop 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+    }
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.94) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .vq-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .cp-badge {
+      background: var(--pink);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.78rem;
+      padding: 0.25rem 0.78rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .cp-required-tag {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #9E1B4B;
+      background: #FFE5EF;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+    }
+    .vq-prompt {
+      font-weight: 800;
+      font-size: clamp(0.96rem, 1.5vw, 1.08rem);
+      margin: 0.35rem 0 0.7rem;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    .vq-choices {
+      display: grid;
+      gap: 0.42rem;
+      margin-bottom: 0.8rem;
+    }
+    .vq-choice {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: #F8FAFF;
+      border: 2px solid var(--line);
+      padding: 0.5rem 0.82rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: clamp(0.85rem, 1.3vw, 0.95rem);
+      transition: border-color 0.12s ease, background 0.12s ease;
+    }
+    .vq-choice:hover {
+      border-color: var(--blue);
+      background: #EEF4FF;
+    }
+    .vq-choice.is-correct, .quiz-choice.is-correct {
+      border-color: var(--green);
+      background: #E7F9F0;
+      color: #136B44;
+    }
+    .vq-choice.is-wrong, .quiz-choice.is-wrong {
+      border-color: var(--pink);
+      background: #FFE9F0;
+      color: #9E1B4B;
+    }
+    .vq-score-hero {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0.85rem 1rem;
+      border-radius: 16px;
+      margin: 0.5rem 0 0.8rem;
+    }
+    .vq-score-hero.pass { background: #D7F7E8; color: #136B44; border: 2px solid var(--green); }
+    .vq-score-hero.fail { background: #FFE1EC; color: #9E1B4B; border: 2px solid var(--pink); }
+    .vq-score-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.65rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .vq-breakdown {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.9rem;
+    }
+    .vq-qchip {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 0.28rem 0.68rem;
+      border-radius: 999px;
+    }
+    .vq-qchip.ok { background: #D7F7E8; color: #136B44; }
+    .vq-qchip.bad { background: #FFE1EC; color: #9E1B4B; }
+
+    /* Checkpoint Bar below video */
+    .checkpoint-bar {
+      margin-top: 0.85rem;
+      padding: 0.75rem 1rem;
+      border-radius: 16px;
+      background: #F6F9FF;
+      border: 2px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+    }
+    .cp-pills { display: flex; flex-wrap: wrap; gap: 0.42rem; align-items: center; }
+    .cp-pill {
+      border: 2px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .cp-pill:hover:not(:disabled) { border-color: var(--blue); }
+    .cp-pill:disabled { opacity: 0.52; cursor: not-allowed; }
+    .cp-pill.done { background: #D7F7E8; border-color: var(--green); color: #136B44; }
+    .cp-pill.active { background: #FFE5EF; border-color: var(--pink); color: #9E1B4B; }
+    .cp-status-note {
+      font-size: 0.83rem;
+      font-weight: 700;
+      color: var(--soft);
+    }
+    .video-error {
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 14px;
+      background: #FFE1EC;
+      color: #9E1B4B;
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+
+    /* Interactive 4x3 GCell Lab */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .metric-box {
+      background: #F7FAFF;
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+    }
+    .metric-lbl { font-size: 0.78rem; font-weight: 700; color: var(--soft); text-transform: uppercase; }
+    .metric-val { font-size: 1.5rem; font-weight: 800; margin-top: 0.15rem; font-family: 'JetBrains Mono', monospace; }
+    .ok-txt { color: var(--green); }
+    .warn-txt { color: #C27800; }
+    .bad-txt { color: var(--pink); }
+    .controls { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-bottom: 0.9rem; }
+
+    /* Draggable Wire Palette */
+    .drag-palette {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.7rem 0.95rem;
+      margin-bottom: 0.9rem;
+      border-radius: 16px;
+      background: #F4F8FF;
+      border: 2px dashed #B8CEFF;
+    }
+    .palette-lbl {
+      font-size: 0.83rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-right: 0.25rem;
+    }
+    .wire-token {
+      user-select: none;
+      touch-action: none;
+      cursor: grab;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.42rem 0.85rem;
+      border-radius: 12px;
+      background: #FFFFFF;
+      border: 2px solid var(--blue);
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 3px 8px rgba(61, 123, 255, 0.14);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .wire-token:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 12px rgba(61, 123, 255, 0.22);
+    }
+    .wire-token:active { cursor: grabbing; }
+    .wire-token .wt-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 0.12rem 0.45rem;
+      border-radius: 8px;
+      background: var(--blue);
+      color: #fff;
+    }
+    .wire-token.bus { border-color: var(--amber); }
+    .wire-token.bus .wt-badge { background: #E09600; }
+    .wire-token.trunk { border-color: var(--pink); }
+    .wire-token.trunk .wt-badge { background: var(--pink); }
+
+    .drag-ghost {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
+      white-space: nowrap;
+    }
+
+    .step-banner {
+      margin: 0 0 0.9rem;
+      padding: 0.7rem 1rem;
+      border-radius: 14px;
+      background: #F4F8FF;
+      border: 2px solid var(--line);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--ink);
+    }
+    .lab-split {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 1.1rem;
+      align-items: start;
+    }
+    @media (max-width: 840px) { .lab-split { grid-template-columns: 1fr; } }
+    #gcell-svg {
+      width: 100%;
+      height: auto;
+      border-radius: 18px;
+      border: 3px solid var(--ink);
+      background: #FFFDF7;
+      display: block;
+      touch-action: none;
+      user-select: none;
+    }
+    .inspector-box {
+      background: #F9FBFF;
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      padding: 1rem 1.15rem;
+    }
+    .inspector-box h3 { margin: 0 0 0.45rem; font-size: 1.15rem; }
+    .hot-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+    .hot-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 10px;
+      background: #FFE1EC;
+      color: #9E1B4B;
+    }
+    .hot-tag.safe {
+      background: #D7F7E8;
+      color: #136B44;
+    }
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.65rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--soft);
+    }
+    .legend-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+      margin-right: 0.3rem;
+      vertical-align: middle;
+    }
+
+    /* Full Quiz Section */
+    .quiz-item {
+      background: #F9FBFF;
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .quiz-prompt { font-weight: 700; margin: 0 0 0.75rem; font-size: 1.02rem; }
+    .quiz-at-badge {
+      display: inline-block;
+      margin-left: 0.45rem;
+      padding: 0.14rem 0.58rem;
+      border-radius: 999px;
+      background: #EEF3FF;
+      color: var(--blue);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .quiz-at-badge:hover { background: #DCE8FF; }
+    .quiz-choices { display: grid; gap: 0.45rem; margin-bottom: 0.8rem; }
+    .quiz-choice {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: #fff;
+      border: 2px solid var(--line);
+      padding: 0.55rem 0.85rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: border-color 0.12s ease, background 0.12s ease;
+    }
+    .quiz-choice:hover { border-color: var(--blue); }
+    .quiz-result {
+      margin-top: 0.55rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: none;
+      line-height: 1.45;
+    }
+    .quiz-result.show { display: block; }
+    .quiz-result.ok { background: #D7F7E8; color: #136B44; }
+    .quiz-result.bad { background: #FFE1EC; color: #9E1B4B; }
+    .quiz-summary {
+      margin-top: 1rem;
+      padding: 0.9rem 1.15rem;
+      border-radius: 16px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      display: none;
+    }
+    .quiz-summary.show { display: block; }
+
+    /* Pitfalls Grid */
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 0.75rem;
+    }
+    .note-pill {
+      border-radius: 18px;
+      padding: 1rem 1.1rem;
+      font-size: 0.93rem;
+      line-height: 1.5;
+    }
+    .note-pill.y { background: #FFF2C6; }
+    .note-pill.g { background: #D7F7E8; }
+    .note-pill.b { background: #DCE8FF; }
+    .note-pill.p { background: #FFE0EC; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#main">
+        <span class="badge-star">★</span>
+        <span data-i18n="brand">Congestion for EDA · Supply and Load</span>
+      </a>
+      <nav class="nav-links" aria-label="Section navigation">
+        <a href="#clip" data-i18n="navVideo">Lesson Video</a>
+        <a href="#tool" data-i18n="navTool">GCell Lab</a>
+        <a href="#quiz" data-i18n="navQuiz">Quiz</a>
+        <a href="#notes" data-i18n="navNotes">Pitfalls</a>
+      </nav>
+      <div class="lang-switch" role="tablist" aria-label="UI Language">
+        <button type="button" role="tab" data-ui-lang="en" aria-selected="true">English</button>
+        <button type="button" role="tab" data-ui-lang="zh" aria-selected="false">中文</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero">
+      <span class="eyebrow" data-i18n="eyebrow">Module 3 · Lesson 1 · Congestion & Global Routing</span>
+      <h1><span data-i18n="titleMain">Congestion:</span> <span class="grad-text" data-i18n="titleAccent">supply & load</span></h1>
+      <p class="lead" data-i18n="heroLead">
+        Divide the chip into a grid of <strong>GCells (tiles)</strong>. For every tile, compare the routing <strong>demand</strong> (wires wanting to pass through) against its <strong>capacity</strong> (routing supply) to detect oversubscribed hot spots early.
+      </p>
+      <div class="formula-strip">
+        <span class="formula-chip">surplus = demand − capacity</span>
+        <span class="formula-chip">overflow = max(0, demand − capacity)</span>
+        <span class="formula-chip">oversubscribed ⇔ surplus > 0</span>
+      </div>
+    </section>
+
+    <!-- Video with External WebVTT Subtitles & Compulsory On-Video Pop-Up Checkpoints -->
+    <section class="card video-panel" id="clip" aria-label="Lesson video">
+      <div class="video-toolbar">
+        <h2 style="margin:0" data-i18n="videoHeading">Lesson Video · Supply and Load</h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="stage-fullscreen" data-i18n="stageFs">⛶ Stage Fullscreen</button>
+      </div>
+
+      <div class="video-stage" id="video-stage">
+        <video id="lesson-video" controls preload="metadata" playsinline></video>
+        <div class="video-quiz-overlay" id="video-quiz-overlay" hidden></div>
+      </div>
+
+      <div class="checkpoint-bar" id="checkpoint-bar">
+        <div class="cp-pills" id="cp-pills"></div>
+        <span class="cp-status-note" id="cp-progress-text" data-i18n="cpCompulsoryNote">Compulsory checkpoints: answer each pop-up to continue</span>
+      </div>
+    </section>
+
+    <section class="card" id="slides-card" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1rem 1.4rem;">
+      <div>
+        <strong id="slides-title">Lesson Slides (PDF)</strong>
+        <div id="slides-sub" style="font-size:0.88rem;color:var(--soft);">Download the slide deck from the video for offline review.</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <a id="slides-dl-btn" class="btn btn-primary btn-sm" href="lesson/slides.pdf" download="supply-and-load-slides.pdf">⬇ Download PDF</a>
+        <a id="slides-view-btn" class="btn btn-ghost btn-sm" href="lesson/slides.pdf" target="_blank" rel="noopener">Open in Tab ↗</a>
+      </div>
+    </section>
+
+    <!-- Interactive 4x3 GCell Supply & Load Lab -->
+    <section class="card" id="tool">
+      <h2 style="margin-top:0" data-i18n="labHeading">Interactive 4×3 GCell Supply & Load Lab</h2>
+      <p class="lead" data-i18n="labLead">
+        Toy chip divided into <strong>4 columns × 3 rows = 12 GCells</strong>. <strong>Click</strong> any box to inspect or adjust via its <code>−</code>/<code>+</code> buttons, <strong>drag a wire element</strong> below onto any tile to add load, or <strong>drag from one tile to another</strong> to reroute <code>0.4</code> load away from hotspots.
+      </p>
+
+      <div class="metrics-bar">
+        <div class="metric-box">
+          <div class="metric-lbl" data-i18n="lblOver">Oversubscribed tiles</div>
+          <div class="metric-val bad-txt" id="m-over">2 / 12</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-lbl" data-i18n="lblOverflow">Total overflow</div>
+          <div class="metric-val" id="m-overflow">1.6</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-lbl" data-i18n="lblMaxSurplus">Max surplus</div>
+          <div class="metric-val" id="m-max">+1.0</div>
+        </div>
+        <div class="metric-box" id="cap-metric-box" style="cursor:pointer" title="Click to toggle Cap 2.0 ↔ 1.0">
+          <div class="metric-lbl" data-i18n="lblCap">Tile Capacity (Cap) ↻</div>
+          <div class="metric-val" id="m-cap">2.0</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button type="button" class="btn btn-primary" id="btn-starter" data-i18n="btnStarter">1 · Toy starter (Cap = 2.0)</button>
+        <button type="button" class="btn btn-pink" id="btn-cap1" data-i18n="btnCap1">2 · Lower Cap → 1.0 (same wires)</button>
+        <button type="button" class="btn btn-amber" id="btn-zero-trap" data-i18n="btnZeroTrap">3 · Trap: 0.0 tile in hot zone</button>
+        <button type="button" class="btn btn-green" id="btn-balance" data-i18n="btnBalance">4 · Spread wires (0 overflow)</button>
+      </div>
+
+      <!-- Draggable Wire Elements Palette -->
+      <div class="drag-palette" id="drag-palette">
+        <span class="palette-lbl" data-i18n="paletteLbl">🧲 Drag onto a GCell box:</span>
+        <div class="wire-token" data-wire-load="0.4" data-wire-name="Signal Net">
+          <span data-i18n="tokNet">Signal Net</span>
+          <span class="wt-badge">+0.4</span>
+        </div>
+        <div class="wire-token bus" data-wire-load="1.0" data-wire-name="Bus Bundle">
+          <span data-i18n="tokBus">Bus Bundle</span>
+          <span class="wt-badge">+1.0</span>
+        </div>
+        <div class="wire-token trunk" data-wire-load="1.6" data-wire-name="Clock Trunk">
+          <span data-i18n="tokTrunk">Clock Trunk</span>
+          <span class="wt-badge">+1.6</span>
+        </div>
+        <span style="font-size:0.8rem;font-weight:700;color:var(--soft);margin-left:auto" data-i18n="dragHint">
+          Tip: Drag tile → tile to shift 0.4 load
+        </span>
+      </div>
+
+      <p class="step-banner" id="step-banner">Starter 4×3 grid (Cap = 2.0): tiles with demand 2.6 (+0.6) and 3.0 (+1.0) are oversubscribed; 2.0 is full (surplus 0).</p>
+
+      <div class="lab-split">
+        <div>
+          <svg id="gcell-svg" viewBox="0 0 640 420" aria-label="4 by 3 GCell congestion grid"></svg>
+          <div class="legend-row">
+            <span><i class="legend-dot" style="background:#D7F7E8;border:2px solid #2BBF7E"></i><span data-i18n="legOk">OK (surplus < 0)</span></span>
+            <span><i class="legend-dot" style="background:#FFF2C6;border:2px solid #FFB300"></i><span data-i18n="legFull">Exact full (surplus = 0)</span></span>
+            <span><i class="legend-dot" style="background:#FFE1EC;border:2px solid #FF5C93"></i><span data-i18n="legHot">Oversubscribed (surplus > 0)</span></span>
+          </div>
+        </div>
+
+        <div class="inspector-box">
+          <h3 id="insp-title">Selected GCell (c=1, r=1)</h3>
+          <p id="insp-math" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;margin:0.4rem 0 0.85rem;line-height:1.6">
+            demand = 3.0<br>
+            capacity = 2.0<br>
+            surplus = +1.0 (oversubscribed!)
+          </p>
+          <div class="controls" style="margin-bottom:0.85rem">
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-dem-down">−0.2 demand</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-dem-up">+0.2 demand</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-cap-toggle">Toggle Cap (2.0 ↔ 1.0)</button>
+          </div>
+          <div style="font-size:0.84rem;font-weight:700;color:var(--soft);text-transform:uppercase" data-i18n="hotListTitle">
+            Oversubscribed Tiles (surplus > 0)
+          </div>
+          <div class="hot-list" id="hot-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Full Quiz Section -->
+    <section class="card" id="quiz">
+      <h2 style="margin-top:0" id="quiz-title">Supply and load check</h2>
+      <p class="lead" id="quiz-subtitle">
+        Module <code>module03-congestion-supply-load</code> · Passing score: <strong>80%</strong> (4 / 5 questions).
+      </p>
+      <div id="quiz-root"></div>
+      <button type="button" class="btn btn-primary" id="score-quiz" data-i18n="scoreBtn">Score quiz</button>
+      <div class="quiz-summary" id="quiz-summary"></div>
+    </section>
+
+    <!-- Pitfalls to Watch -->
+    <section class="card" id="notes">
+      <h2 style="margin-top:0" data-i18n="notesHeading">Pitfalls to Watch</h2>
+      <div class="notes-grid">
+        <div class="note-pill y" data-i18n-html="trap1"><strong>Trap 1 · Full (0.0 surplus) ≠ Hot:</strong> When <code>demand = 2.0</code> and <code>Cap = 2.0</code>, <code>surplus = 0</code>. A tile is oversubscribed only when <code>surplus > 0</code> strictly.</div>
+        <div class="note-pill p" data-i18n-html="trap2"><strong>Trap 2 · Forgetting Which Cap You Used:</strong> Lowering <code>Cap</code> from <code>2.0</code> to <code>1.0</code> shrinks supply for the same wires, flipping borderline tiles to hot. Always record units and <code>Cap</code>.</div>
+        <div class="note-pill b" data-i18n-html="trap3"><strong>Trap 3 · Trusting an Isolated <code>0.0</code> Tile:</strong> A tile with <code>0.0</code> demand can still sit boxed inside a hot neighborhood—always inspect its neighboring GCells.</div>
+        <div class="note-pill g" data-i18n-html="trap4"><strong>Trap 4 · Heat Map Without a Tile List:</strong> Always list oversubscribed tiles <code>(col, row)</code> with exact <code>demand − capacity</code> numbers before trusting color shading alone.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /* ======================================================================
+       1. MEDIA URL RESOLVER & EXTERNAL WEBVTT CAPTION WIRING
+       ====================================================================== */
+    const COURSE_ID = "learn_congestion";
+    const MODULE_DIR = "module03-congestion-supply-load";
+    const ORG = "SJTU-YONGFU-RESEARCH-GRP";
+    const MEDIA_REPO = "eda-learning";
+    const BRANCH = "main";
+
+    function localFileUrl(courseId, dir, file) {
+      const depth = document.querySelector("[data-asset-base]");
+      const assetBase = (depth && depth.getAttribute("data-asset-base")) || "../../../../assets/";
+      const prefix = String(assetBase).replace(/assets\/?$/, "course-media/");
+      return `${prefix}${courseId}/${dir}/${file}`;
+    }
+
+    function cdnFileUrl(file) {
+      return `https://cdn.jsdelivr.net/gh/${ORG}/${MEDIA_REPO}@${BRANCH}/courses/${COURSE_ID}/${MODULE_DIR}/${file}`;
+    }
+
+    function rawGithubUrl(file) {
+      return `https://raw.githubusercontent.com/${ORG}/${MEDIA_REPO}/${BRANCH}/courses/${COURSE_ID}/${MODULE_DIR}/${file}`;
+    }
+
+    async function initLessonVideoAndCaptions() {
+      const video = document.getElementById("lesson-video");
+      const panel = video.closest(".video-panel");
+      if (!video) return;
+
+      const videoCandidates = [
+        "lesson/final_full.mp4",
+        "final_full.mp4",
+        localFileUrl(COURSE_ID, MODULE_DIR, "final_full.mp4")
+      ];
+
+      const capDirs = [
+        "lesson/",
+        "",
+        "captions/",
+        localFileUrl(COURSE_ID, MODULE_DIR, ""),
+        `course-media/${COURSE_ID}/${MODULE_DIR}/`
+      ];
+
+      let capBase = "lesson/";
+      for (const dir of capDirs) {
+        try {
+          const r = await fetch(`${dir}supply_and_load.zh.vtt`, { method: "HEAD", cache: "no-cache" });
+          if (r.ok) { capBase = dir; break; }
+        } catch (_) {}
+      }
+
+      const tracks = [
+        { srclang: "zh",  label: "中文",            file: "supply_and_load.zh.vtt",        def: true,  required: true  },
+        { srclang: "en",  label: "English",        file: "supply_and_load.en.vtt",        def: false, required: false },
+        { srclang: "mul", label: "English + 中文", file: "supply_and_load.bilingual.vtt", def: false, required: false }
+      ];
+
+      for (const t of tracks) {
+        if (!t.required) {
+          try {
+            const check = await fetch(`${capBase}${t.file}`, { method: "HEAD", cache: "no-cache" });
+            if (!check.ok) continue;
+          } catch (_) {
+            continue;
+          }
+        }
+        const el = document.createElement("track");
+        el.kind = "subtitles";
+        el.srclang = t.srclang;
+        el.label = t.label;
+        el.src = `${capBase}${t.file}`;
+        if (t.def) el.default = true;
+        video.appendChild(el);
+        if (t.def && el.track) {
+          el.track.mode = "showing";
+        }
+      }
+
+      const activateDefaultTrack = () => {
+        if (!video.textTracks) return;
+        for (let i = 0; i < video.textTracks.length; i++) {
+          const tt = video.textTracks[i];
+          if (tt.language === "zh" && tt.mode === "disabled") {
+            tt.mode = "showing";
+          }
+        }
+      };
+      video.addEventListener("loadedmetadata", activateDefaultTrack);
+
+      let videoLoaded = false;
+      video.addEventListener("loadeddata", () => {
+        videoLoaded = true;
+        activateDefaultTrack();
+      });
+
+      let fi = 0;
+      const tryNextVideo = () => {
+        if (videoLoaded) return;
+        if (fi < videoCandidates.length) {
+          video.src = videoCandidates[fi++];
+          video.load();
+          return;
+        }
+        if (!panel.querySelector("[data-video-error]")) {
+          const hint = document.createElement("p");
+          hint.className = "video-error";
+          hint.setAttribute("data-video-error", "");
+          hint.innerHTML = `Video file not found. Place <code>final_full.mp4</code> (or <code>video.mp4</code>) next to <code>index.html</code> or inside <code>lesson/</code> alongside <code>lesson/supply_and_load.zh.vtt</code>, and open via <code>http://localhost:8000</code>.`;
+          panel.appendChild(hint);
+        }
+      };
+
+      video.addEventListener("error", tryNextVideo);
+      tryNextVideo();
+    }
+
+    initLessonVideoAndCaptions();
+
+    /* ======================================================================
+       2. BILINGUAL UI DICTIONARY (EN / ZH)
+       ====================================================================== */
+    let currentLang = "en";
+    const I18N = {
+      en: {
+        brand: "Congestion for EDA · Supply and Load",
+        navVideo: "Lesson Video",
+        navTool: "GCell Lab",
+        navQuiz: "Quiz",
+        navNotes: "Pitfalls",
+        eyebrow: "Module 3 · Lesson 1 · Congestion & Global Routing",
+        titleMain: "Congestion:",
+        titleAccent: "supply & load",
+        heroLead: "Divide the chip into a grid of GCells (tiles). For every tile, compare the routing demand (wires wanting to pass through) against its capacity (routing supply) to detect oversubscribed hot spots early.",
+        videoHeading: "Lesson Video · Supply and Load",
+        stageFs: "⛶ Stage Fullscreen",
+        cpCompulsoryNote: "Compulsory checkpoints: answer each pop-up to continue",
+        labHeading: "Interactive 4×3 GCell Supply & Load Lab",
+        labLead: "Toy chip divided into 4 columns × 3 rows = 12 GCells. Click any box to inspect or tweak via its −/+ buttons, drag a wire element onto a tile to add load, or drag tile-to-tile to reroute 0.4 load away from hotspots.",
+        lblOver: "Oversubscribed tiles",
+        lblOverflow: "Total overflow",
+        lblMaxSurplus: "Max surplus",
+        lblCap: "Tile Capacity (Cap) ↻",
+        btnStarter: "1 · Toy starter (Cap = 2.0)",
+        btnCap1: "2 · Lower Cap → 1.0 (same wires)",
+        btnZeroTrap: "3 · Trap: 0.0 tile in hot zone",
+        btnBalance: "4 · Spread wires (0 overflow)",
+        paletteLbl: "🧲 Drag onto a GCell box:",
+        tokNet: "Signal Net",
+        tokBus: "Bus Bundle",
+        tokTrunk: "Clock Trunk",
+        dragHint: "Tip: Drag tile → tile to shift 0.4 load",
+        legOk: "OK (surplus < 0)",
+        legFull: "Exact full (surplus = 0)",
+        legHot: "Oversubscribed (surplus > 0)",
+        hotListTitle: "Oversubscribed Tiles (surplus > 0)",
+        scoreBtn: "Score quiz",
+        notesHeading: "Pitfalls to Watch",
+        trap1: "<strong>Trap 1 · Full (0.0 surplus) ≠ Hot:</strong> When <code>demand = 2.0</code> and <code>Cap = 2.0</code>, <code>surplus = 0</code>. A tile is oversubscribed only when <code>surplus > 0</code> strictly.",
+        trap2: "<strong>Trap 2 · Forgetting Which Cap You Used:</strong> Lowering <code>Cap</code> from <code>2.0</code> to <code>1.0</code> shrinks supply for the same wires, flipping borderline tiles to hot. Always record units and <code>Cap</code>.",
+        trap3: "<strong>Trap 3 · Trusting an Isolated <code>0.0</code> Tile:</strong> A tile with <code>0.0</code> demand can still sit boxed inside a hot neighborhood—always inspect its neighboring GCells.",
+        trap4: "<strong>Trap 4 · Heat Map Without a Tile List:</strong> Always list oversubscribed tiles <code>(col, row)</code> with exact <code>demand − capacity</code> numbers before trusting color shading alone."
+      },
+      zh: {
+        brand: "EDA 布局布线 · 第 3 章第 1 课",
+        navVideo: "课程视频",
+        navTool: "GCell 实验",
+        navQuiz: "随堂测验",
+        navNotes: "常见陷阱",
+        eyebrow: "第 3 章 · 第 1 课 · 拥塞评估（供给与负载）",
+        titleMain: "布线拥塞：",
+        titleAccent: "供给与负载（Supply & Load）",
+        heroLead: "将芯片划分为 GCell（网格瓦片）阵列。逐一比较每个瓦片的布线需求（demand，穿过的连线负载）与布线容量（capacity，可用通道供给），计算 surplus = demand − capacity 提前定位过载热点。",
+        videoHeading: "课程视频 · 供给与负载",
+        stageFs: "⛶ 舞台全屏",
+        cpCompulsoryNote: "必答检查点：必须作答当前弹窗题目后方可继续播放",
+        labHeading: "4×3 GCell 供给与负载交互实验",
+        labLead: "教学芯片划分为 4 列 × 3 行 = 12 个 GCell。点击任意方格可直接点按 −/+ 微调负载，拖动下方线网组件放入方格增加负载，或从一个方格拖动到另一个方格转移 0.4 负载以疏导拥塞。",
+        lblOver: "过载瓦片数",
+        lblOverflow: "总溢出量 (Overflow)",
+        lblMaxSurplus: "最大盈余/超额",
+        lblCap: "单瓦片容量 (Cap) ↻",
+        btnStarter: "1 · 初始网格 (Cap = 2.0)",
+        btnCap1: "2 · 降低 Cap → 1.0（连线不变）",
+        btnZeroTrap: "3 · 陷阱：热点包围的 0.0 瓦片",
+        btnBalance: "4 · 均衡疏导（0 溢出）",
+        paletteLbl: "🧲 拖动线网到任意 GCell 方格：",
+        tokNet: "单根信号线",
+        tokBus: "总线线束",
+        tokTrunk: "时钟主干",
+        dragHint: "提示：拖动方格 → 邻格可转移 0.4 负载",
+        legOk: "正常 (surplus < 0)",
+        legFull: "恰好满载 (surplus = 0)",
+        legHot: "过载拥塞 (surplus > 0)",
+        hotListTitle: "过载瓦片列表 (surplus > 0)",
+        scoreBtn: "提交评分",
+        notesHeading: "常见易错点",
+        trap1: "<strong>陷阱 1 · 恰好满载（0.0）≠ 过载：</strong> 当 <code>demand = 2.0</code> 且 <code>Cap = 2.0</code> 时，<code>surplus = 0</code>。只有严格满足 <code>surplus > 0</code> 才算过载。",
+        trap2: "<strong>陷阱 2 · 忘记标注当前 Cap：</strong> 保持连线不变而将 <code>Cap</code> 从 <code>2.0</code> 降为 <code>1.0</code> 时，原本正常的临界瓦片会立刻变红过载，务必注明容量基准。",
+        trap3: "<strong>陷阱 3 · 误信孤立的 <code>0.0</code> 瓦片：</strong> 需求为 <code>0.0</code> 的瓦片若被多个过载邻居包围，仍处于高拥塞区域，必须结合邻域检查。",
+        trap4: "<strong>陷阱 4 · 只看热力图不列明细：</strong> 不能仅凭颜色判断，应先列出所有过载瓦片 <code>(col, row)</code> 及其精确的 <code>demand − capacity</code> 数值。"
+      }
+    };
+
+    document.querySelectorAll("[data-ui-lang]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentLang = btn.dataset.uiLang;
+        document.querySelectorAll("[data-ui-lang]").forEach(b => b.setAttribute("aria-selected", String(b === btn)));
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+          const k = el.dataset.i18n;
+          if (I18N[currentLang][k]) el.textContent = I18N[currentLang][k];
+        });
+        document.querySelectorAll("[data-i18n-html]").forEach(el => {
+          const k = el.dataset.i18nHtml;
+          if (I18N[currentLang][k]) el.innerHTML = I18N[currentLang][k];
+        });
+        renderGCellGrid();
+        renderQuiz();
+        renderCheckpointPills();
+        if (activeCheckpointId) {
+          const cp = getTimedCheckpoints().find(x => x.id === activeCheckpointId);
+          if (cp) openOnVideoCheckpoint(cp);
+        } else if (videoCompletedSummaryOpen) {
+          showVideoCompletionSummary();
+        }
+      });
+    });
+
+    /* ======================================================================
+       3. INTERACTIVE 4x3 GCELL LAB (CLICK BOXES, IN-TILE +/- & DRAG-AND-DROP)
+       ====================================================================== */
+    const COLS = 4, ROWS = 3;
+    const STARTER_DEMANDS = [
+      [0.8, 1.4, 1.8, 1.0],
+      [1.2, 3.0, 2.6, 0.0],
+      [0.6, 2.0, 1.6, 0.8]
+    ];
+
+    let cap = 2.0;
+    let demands = STARTER_DEMANDS.map(r => [...r]);
+    let selectedTile = { c: 1, r: 1 };
+    let hoverDropTile = null;
+
+    function round1(x) { return Math.round(x * 10) / 10; }
+
+    function setBanner(enText, zhText) {
+      document.getElementById("step-banner").textContent = currentLang === "zh" ? zhText : enText;
+    }
+
+    function renderGCellGrid() {
+      const svg = document.getElementById("gcell-svg");
+      const x0 = 56, y0 = 26, cw = 132, ch = 114;
+      let out = "";
+
+      for (let c = 0; c < COLS; c++) {
+        out += `<text x="${x0 + c*cw + cw/2}" y="${y0 + ROWS*ch + 28}" font-size="15" font-weight="700" fill="#5C6B9C" text-anchor="middle">col ${c}</text>`;
+      }
+      for (let r = 0; r < ROWS; r++) {
+        const py = y0 + (ROWS - 1 - r) * ch;
+        out += `<text x="${x0 - 14}" y="${py + ch/2 + 5}" font-size="15" font-weight="700" fill="#5C6B9C" text-anchor="end">r=${r}</text>`;
+      }
+
+      let overCount = 0;
+      let totalOverflow = 0;
+      let maxSurplus = -Infinity;
+      const hotTiles = [];
+
+      for (let r = 0; r < ROWS; r++) {
+        const gridRowIdx = ROWS - 1 - r;
+        for (let c = 0; c < COLS; c++) {
+          const d = round1(demands[gridRowIdx][c]);
+          const sur = round1(d - cap);
+          const ov = sur > 0 ? sur : 0;
+          if (sur > 0) {
+            overCount++;
+            totalOverflow = round1(totalOverflow + ov);
+            hotTiles.push({ c, r, d, sur });
+          }
+          if (sur > maxSurplus) maxSurplus = sur;
+
+          let fill = "#E7F9F0", stroke = "#2BBF7E", tagBg = "#2BBF7E", tagText = `${sur >= 0 ? "+" : ""}${sur.toFixed(1)} OK`;
+          if (sur > 0) {
+            fill = "#FFE1EC"; stroke = "#FF5C93"; tagBg = "#FF5C93";
+            tagText = `+${sur.toFixed(1)} HOT`;
+          } else if (sur === 0) {
+            fill = "#FFF3CC"; stroke = "#FFB300"; tagBg = "#E09600";
+            tagText = `0.0 FULL`;
+          }
+
+          const px = x0 + c * cw;
+          const py = y0 + (ROWS - 1 - r) * ch;
+          const isSel = selectedTile.c === c && selectedTile.r === r;
+          const isDropTarget = hoverDropTile && hoverDropTile.c === c && hoverDropTile.r === r;
+
+          out += `<g class="gcell-tile" data-c="${c}" data-r="${r}" style="cursor:grab">
+            <rect x="${px + 5}" y="${py + 5}" width="${cw - 10}" height="${ch - 10}" rx="16"
+                  fill="${fill}"
+                  stroke="${isDropTarget ? "#9B5DFF" : (isSel ? "#3D7BFF" : stroke)}"
+                  stroke-width="${isDropTarget ? 5 : (isSel ? 4.5 : 3)}"
+                  ${isDropTarget ? 'stroke-dasharray="7 4"' : ''}/>
+            <text x="${px + 15}" y="${py + 24}" font-size="12" font-weight="700" fill="#5C6B9C">(${c},${r})</text>
+
+            <g class="tile-step-btn" data-step="-0.2" data-c="${c}" data-r="${r}" style="cursor:pointer">
+              <rect x="${px + cw - 56}" y="${py + 10}" width="21" height="20" rx="6" fill="#FFFFFF" stroke="#CBD8F6" stroke-width="1.5"/>
+              <text x="${px + cw - 45.5}" y="${py + 24}" font-size="14" font-weight="800" fill="#1F2A5A" text-anchor="middle">−</text>
+            </g>
+            <g class="tile-step-btn" data-step="0.2" data-c="${c}" data-r="${r}" style="cursor:pointer">
+              <rect x="${px + cw - 31}" y="${py + 10}" width="21" height="20" rx="6" fill="#FFFFFF" stroke="#CBD8F6" stroke-width="1.5"/>
+              <text x="${px + cw - 20.5}" y="${py + 24}" font-size="14" font-weight="800" fill="#1F2A5A" text-anchor="middle">+</text>
+            </g>
+
+            <text x="${px + cw/2}" y="${py + 62}" font-size="26" font-weight="800" fill="#1F2A5A" text-anchor="middle">${d.toFixed(1)}</text>
+            <rect x="${px + 22}" y="${py + 76}" width="${cw - 44}" height="22" rx="11" fill="${tagBg}"/>
+            <text x="${px + cw/2}" y="${py + 91}" font-size="11.5" font-weight="800" fill="#fff" text-anchor="middle">${tagText}</text>
+          </g>`;
+        }
+      }
+      svg.innerHTML = out;
+
+      const overEl = document.getElementById("m-over");
+      overEl.textContent = `${overCount} / ${COLS * ROWS}`;
+      overEl.className = "metric-val " + (overCount > 0 ? "bad-txt" : "ok-txt");
+      document.getElementById("m-overflow").textContent = totalOverflow.toFixed(1);
+      const maxEl = document.getElementById("m-max");
+      maxEl.textContent = `${maxSurplus >= 0 ? "+" : ""}${maxSurplus.toFixed(1)}`;
+      maxEl.className = "metric-val " + (maxSurplus > 0 ? "bad-txt" : (maxSurplus === 0 ? "warn-txt" : "ok-txt"));
+      document.getElementById("m-cap").textContent = cap.toFixed(1);
+
+      const sd = round1(demands[ROWS - 1 - selectedTile.r][selectedTile.c]);
+      const ssur = round1(sd - cap);
+      const statusStr = ssur > 0
+        ? (currentLang === "zh" ? "过载 (oversubscribed!)" : "oversubscribed!")
+        : (ssur === 0
+            ? (currentLang === "zh" ? "恰好满载，未过载 (full, OK)" : "exact full — NOT oversubscribed")
+            : (currentLang === "zh" ? "容量充足 (under budget)" : "under capacity (OK)"));
+      document.getElementById("insp-title").textContent = currentLang === "zh"
+        ? `当前选中 GCell (col=${selectedTile.c}, row=${selectedTile.r})`
+        : `Selected GCell (col=${selectedTile.c}, row=${selectedTile.r})`;
+      document.getElementById("insp-math").innerHTML =
+        `demand   = ${sd.toFixed(1)}<br>` +
+        `capacity = ${cap.toFixed(1)}<br>` +
+        `surplus  = ${ssur >= 0 ? "+" : ""}${ssur.toFixed(1)} (${statusStr})`;
+
+      const hotListEl = document.getElementById("hot-list");
+      if (hotTiles.length === 0) {
+        hotListEl.innerHTML = `<span class="hot-tag safe">${currentLang === "zh" ? "✓ 无过载瓦片 (0 overflow)" : "✓ None (all tiles ≤ Cap)"}</span>`;
+      } else {
+        hotListEl.innerHTML = hotTiles
+          .map(t => `<span class="hot-tag">(${t.c},${t.r}) d=${t.d.toFixed(1)} (+${t.sur.toFixed(1)})</span>`)
+          .join("");
+      }
+    }
+
+    let dragState = null;
+
+    function hitTestGCell(clientX, clientY) {
+      const svg = document.getElementById("gcell-svg");
+      const rect = svg.getBoundingClientRect();
+      if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
+        return null;
+      }
+      const vbX = ((clientX - rect.left) / rect.width) * 640;
+      const vbY = ((clientY - rect.top) / rect.height) * 420;
+      const x0 = 56, y0 = 26, cw = 132, ch = 114;
+      const c = Math.floor((vbX - x0) / cw);
+      const rFromTop = Math.floor((vbY - y0) / ch);
+      if (c >= 0 && c < COLS && rFromTop >= 0 && rFromTop < ROWS) {
+        return { c, r: ROWS - 1 - rFromTop };
+      }
+      return null;
+    }
+
+    function startDrag(e, payload) {
+      const ghost = document.createElement("div");
+      ghost.className = "drag-ghost";
+      ghost.textContent = payload.badgeText;
+      ghost.style.left = `${e.clientX}px`;
+      ghost.style.top = `${e.clientY}px`;
+      document.body.appendChild(ghost);
+      dragState = {
+        ...payload,
+        startX: e.clientX,
+        startY: e.clientY,
+        moved: false,
+        ghost
+      };
+    }
+
+    document.getElementById("drag-palette").addEventListener("pointerdown", e => {
+      const token = e.target.closest(".wire-token");
+      if (!token) return;
+      e.preventDefault();
+      const load = Number(token.dataset.wireLoad);
+      const name = token.dataset.wireName;
+      startDrag(e, {
+        kind: "palette",
+        load,
+        name,
+        badgeText: `+${load.toFixed(1)} ${name}`
+      });
+    });
+
+    document.getElementById("gcell-svg").addEventListener("pointerdown", e => {
+      const stepBtn = e.target.closest(".tile-step-btn");
+      if (stepBtn) {
+        e.stopPropagation();
+        const c = Number(stepBtn.dataset.c);
+        const r = Number(stepBtn.dataset.r);
+        const delta = Number(stepBtn.dataset.step);
+        selectedTile = { c, r };
+        const idx = ROWS - 1 - r;
+        demands[idx][c] = Math.max(0, round1(demands[idx][c] + delta));
+        setBanner(
+          `Adjusted GCell (${c}, ${r}) demand by ${delta >= 0 ? "+" : ""}${delta.toFixed(1)} → ${demands[idx][c].toFixed(1)}.`,
+          `已调整 GCell (${c}, ${r}) 需求 ${delta >= 0 ? "+" : ""}${delta.toFixed(1)} → ${demands[idx][c].toFixed(1)}。`
+        );
+        renderGCellGrid();
+        return;
+      }
+
+      const tile = e.target.closest(".gcell-tile");
+      if (!tile) return;
+      const c = Number(tile.dataset.c);
+      const r = Number(tile.dataset.r);
+      selectedTile = { c, r };
+      renderGCellGrid();
+
+      const curLoad = round1(demands[ROWS - 1 - r][c]);
+      if (curLoad > 0) {
+        const shiftAmt = Math.min(0.4, curLoad);
+        startDrag(e, {
+          kind: "tile",
+          fromC: c,
+          fromR: r,
+          shiftAmt,
+          badgeText: `⇄ Move ${shiftAmt.toFixed(1)} from (${c},${r})`
+        });
+      }
+    });
+
+    window.addEventListener("pointermove", e => {
+      if (!dragState) return;
+      if (Math.hypot(e.clientX - dragState.startX, e.clientY - dragState.startY) > 6) {
+        dragState.moved = true;
+      }
+      dragState.ghost.style.left = `${e.clientX}px`;
+      dragState.ghost.style.top = `${e.clientY}px`;
+      const hit = hitTestGCell(e.clientX, e.clientY);
+      const prevKey = hoverDropTile ? `${hoverDropTile.c},${hoverDropTile.r}` : "";
+      const nextKey = hit ? `${hit.c},${hit.r}` : "";
+      if (prevKey !== nextKey) {
+        hoverDropTile = hit;
+        renderGCellGrid();
+      }
+    });
+
+    window.addEventListener("pointerup", e => {
+      if (!dragState) return;
+      const ds = dragState;
+      dragState = null;
+      ds.ghost.remove();
+
+      const dropTile = hitTestGCell(e.clientX, e.clientY);
+      hoverDropTile = null;
+
+      if (ds.moved && dropTile) {
+        selectedTile = { c: dropTile.c, r: dropTile.r };
+        if (ds.kind === "palette") {
+          const idx = ROWS - 1 - dropTile.r;
+          demands[idx][dropTile.c] = round1(demands[idx][dropTile.c] + ds.load);
+          setBanner(
+            `Dropped ${ds.name} (+${ds.load.toFixed(1)}) onto GCell (${dropTile.c}, ${dropTile.r}) → demand = ${demands[idx][dropTile.c].toFixed(1)}.`,
+            `已将 ${ds.name} (+${ds.load.toFixed(1)}) 拖入 GCell (${dropTile.c}, ${dropTile.r}) → 当前需求 = ${demands[idx][dropTile.c].toFixed(1)}。`
+          );
+        } else if (ds.kind === "tile" && (ds.fromC !== dropTile.c || ds.fromR !== dropTile.r)) {
+          const srcIdx = ROWS - 1 - ds.fromR;
+          const dstIdx = ROWS - 1 - dropTile.r;
+          const moved = Math.min(ds.shiftAmt, round1(demands[srcIdx][ds.fromC]));
+          demands[srcIdx][ds.fromC] = round1(demands[srcIdx][ds.fromC] - moved);
+          demands[dstIdx][dropTile.c] = round1(demands[dstIdx][dropTile.c] + moved);
+          setBanner(
+            `Rerouted ${moved.toFixed(1)} wire load from (${ds.fromC}, ${ds.fromR}) → (${dropTile.c}, ${dropTile.r}).`,
+            `已将 ${moved.toFixed(1)} 布线负载从 (${ds.fromC}, ${ds.fromR}) 疏导至 (${dropTile.c}, ${dropTile.r})。`
+          );
+        }
+      }
+      renderGCellGrid();
+    });
+
+    document.getElementById("btn-dem-down").onclick = () => {
+      const idx = ROWS - 1 - selectedTile.r;
+      demands[idx][selectedTile.c] = Math.max(0, round1(demands[idx][selectedTile.c] - 0.2));
+      renderGCellGrid();
+    };
+    document.getElementById("btn-dem-up").onclick = () => {
+      const idx = ROWS - 1 - selectedTile.r;
+      demands[idx][selectedTile.c] = round1(demands[idx][selectedTile.c] + 0.2);
+      renderGCellGrid();
+    };
+    const toggleCapAction = () => {
+      cap = cap === 2.0 ? 1.0 : 2.0;
+      renderGCellGrid();
+    };
+    document.getElementById("btn-cap-toggle").onclick = toggleCapAction;
+    document.getElementById("cap-metric-box").onclick = toggleCapAction;
+
+    document.getElementById("btn-starter").onclick = () => {
+      cap = 2.0;
+      demands = STARTER_DEMANDS.map(r => [...r]);
+      selectedTile = { c: 1, r: 1 };
+      setBanner(
+        "Starter 4×3 grid (Cap = 2.0): tiles with demand 2.6 (+0.6) and 3.0 (+1.0) are oversubscribed; 2.0 is full (surplus 0).",
+        "初始 4×3 网格（Cap = 2.0）：需求为 2.6（+0.6）和 3.0（+1.0）的 2 个瓦片过载；2.0 为恰好满载（surplus = 0）。"
+      );
+      renderGCellGrid();
+    };
+
+    document.getElementById("btn-cap1").onclick = () => {
+      cap = 1.0;
+      demands = STARTER_DEMANDS.map(r => [...r]);
+      selectedTile = { c: 1, r: 2 };
+      setBanner(
+        "Lowered Cap from 2.0 → 1.0 with identical wires: borderline tiles (1.4, 2.0, 1.8) immediately flip to oversubscribed!",
+        "保持布线不变，将 Cap 从 2.0 降至 1.0：原本正常的临界瓦片（1.4、2.0、1.8）全部翻转为过载！"
+      );
+      renderGCellGrid();
+    };
+
+    document.getElementById("btn-zero-trap").onclick = () => {
+      cap = 2.0;
+      demands = [
+        [1.4, 2.6, 2.8, 1.6],
+        [1.8, 3.0, 0.0, 2.4],
+        [1.2, 2.4, 2.6, 1.4]
+      ];
+      selectedTile = { c: 2, r: 1 };
+      setBanner(
+        "Beginner trap: tile (2, 1) has 0.0 demand, yet all four neighbors (2.8, 3.0, 2.4, 2.6) are hot! Never assume a 0.0 tile is safe in isolation.",
+        "常见陷阱：瓦片 (2, 1) 自身需求为 0.0，但四周邻居（2.8、3.0、2.4、2.6）全线过载！切勿孤立看待 0.0 瓦片。"
+      );
+      renderGCellGrid();
+    };
+
+    document.getElementById("btn-balance").onclick = () => {
+      cap = 2.0;
+      demands = [
+        [1.2, 1.6, 1.8, 1.2],
+        [1.6, 1.8, 1.8, 1.2],
+        [1.2, 1.6, 1.6, 1.2]
+      ];
+      selectedTile = { c: 1, r: 1 };
+      setBanner(
+        "Balanced routing demand: every GCell has demand ≤ Cap (2.0). Oversubscribed tiles = 0, total overflow = 0.0.",
+        "布线疏导均衡后：所有 12 个 GCell 均满足 demand ≤ Cap（2.0），过载瓦片数为 0，总溢出为 0.0。"
+      );
+      renderGCellGrid();
+    };
+
+    renderGCellGrid();
+
+    /* ======================================================================
+       4. COMPULSORY VIDEO-ALIGNED CHECKPOINT POP-UP, END-OF-VIDEO SCORE & QUIZ
+       ====================================================================== */
+    const DEFAULT_TIMINGS = {
+      "capacity-demand-q1": 39,
+      "capacity-demand-q2": 55,
+      "capacity-demand-q3": 70,
+      "capacity-demand-q4": 94,
+      "capacity-demand-q5": 136
+    };
+
+    const FALLBACK_QUIZ = {
+      "id": "module03-congestion-supply-load",
+      "title": "Supply and load check",
+      "items": [
+        {
+          "id": "capacity-demand-q1",
+          "at": 39,
+          "type": "mcq",
+          "prompt": "In this lesson, what is checked for every GCell (tile) to find congestion?",
+          "choices": [
+            "Detailed maze routing with rip-up",
+            "Whether demand is larger than capacity",
+            "Abacus row packing",
+            "Liberty timing arcs"
+          ],
+          "answer": 1,
+          "explain": "Each tile compares the wires wanting to pass (demand) with the wires it can hold (capacity). Maze routing, row packing and timing arcs belong to other lessons."
+        },
+        {
+          "id": "capacity-demand-q2",
+          "at": 55,
+          "type": "mcq",
+          "prompt": "How is surplus (and overflow) calculated for a GCell?",
+          "choices": [
+            "demand × capacity",
+            "HPWL only",
+            "surplus = demand − capacity; overflow when it is above 0",
+            "It is always zero after legalization"
+          ],
+          "answer": 2,
+          "explain": "surplus = demand − capacity. A positive surplus means the tile is oversubscribed; the overflow is max(0, demand − capacity)."
+        },
+        {
+          "id": "capacity-demand-q3",
+          "at": 70,
+          "type": "mcq",
+          "prompt": "Capacity is 2.0. A tile has demand 2.0. Is it oversubscribed?",
+          "choices": [
+            "Yes, because demand equals capacity",
+            "No, it is exactly full: surplus is 0, not above 0",
+            "Yes, because surplus is positive",
+            "It depends on the neighbours only"
+          ],
+          "answer": 1,
+          "explain": "Oversubscribed means surplus > 0 (strictly greater). Exactly full is still OK."
+        },
+        {
+          "id": "capacity-demand-q4",
+          "at": 94,
+          "type": "mcq",
+          "prompt": "With capacity 2.0, demands are 1.4, 2.0, 2.6 and 3.0. How many tiles are oversubscribed?",
+          "choices": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "answer": 1,
+          "explain": "Only 2.6 (+0.6) and 3.0 (+1.0) are above 2.0; 2.0 is full (surplus 0), not over."
+        },
+        {
+          "id": "capacity-demand-q5",
+          "at": 136,
+          "type": "mcq",
+          "prompt": "You lower Cap from 2.0 to 1.0 but keep the same wires and tiles. What usually happens?",
+          "choices": [
+            "More tiles become oversubscribed",
+            "Fewer tiles become oversubscribed",
+            "Nothing changes",
+            "Demand automatically drops"
+          ],
+          "answer": 0,
+          "explain": "Demand is unchanged but the budget is smaller, so borderline tiles flip to hot. Always say which Cap you used."
+        }
+      ]
+    };
+
+    const ZH_TRANSLATIONS = {
+      title: "供给与负载随堂检查",
+      "capacity-demand-q1": {
+        prompt: "在本课中，如何检查每个 GCell（网格瓦片）是否存在拥塞？",
+        choices: [
+          "带拆线重布的详细迷宫布线",
+          "检查需求（demand）是否大于容量（capacity）",
+          "Abacus 行内紧凑排列",
+          "Liberty 时序弧分析"
+        ],
+        explain: "每个瓦片比较想穿过的连线数量（demand）与可容纳上限（capacity）。迷宫布线、行打包和时序分析属于其他课程。"
+      },
+      "capacity-demand-q2": {
+        prompt: "如何计算一个 GCell 的超额盈余（surplus）和溢出（overflow）？",
+        choices: [
+          "demand × capacity",
+          "仅计算 HPWL 线长",
+          "surplus = demand − capacity；当其大于 0 时产生溢出",
+          "合法化后始终为零"
+        ],
+        explain: "surplus = demand − capacity。正值表示瓦片过载，溢出量 overflow = max(0, demand − capacity)。"
+      },
+      "capacity-demand-q3": {
+        prompt: "容量为 2.0，某瓦片需求为 2.0，它算过载（oversubscribed）吗？",
+        choices: [
+          "算，因为需求等于容量",
+          "不算，它只是恰好满载：surplus 为 0，并未大于 0",
+          "算，因为 surplus 为正数",
+          "仅取决于相邻瓦片"
+        ],
+        explain: "过载要求 surplus > 0（严格大于）。恰好满载仍然合法可用。"
+      },
+      "capacity-demand-q4": {
+        prompt: "容量为 2.0 时，四个瓦片的需求分别为 1.4、2.0、2.6 和 3.0，有多少个瓦片过载？",
+        choices: ["1", "2", "3", "4"],
+        explain: "只有 2.6（+0.6）和 3.0（+1.0）严格大于 2.0；2.0 只是恰好满载（surplus 为 0），不算过载。"
+      },
+      "capacity-demand-q5": {
+        prompt: "保持连线和网格不变，将 Cap 从 2.0 降低到 1.0，通常会发生什么？",
+        choices: [
+          "更多瓦片变为过载",
+          "更少瓦片变为过载",
+          "没有任何变化",
+          "需求会自动下降"
+        ],
+        explain: "连线需求未变但容量预算缩减，临界瓦片会翻转为热点。务必注明所使用的 Cap。"
+      }
+    };
+
+    let activeQuiz = FALLBACK_QUIZ;
+    const answeredCheckpoints = new Set();
+    const userAnswers = {};
+    const gradedQuizIds = new Set();
+    let activeCheckpointId = null;
+    let activeCheckpointPausedTime = null;
+    let videoCompletedSummaryOpen = false;
+
+    function fmtSec(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${m}:${String(r).padStart(2, "0")}`;
+    }
+
+    function parseAt(val) {
+      if (val === null || val === undefined || val === "") return null;
+      const n = Number(val);
+      return Number.isFinite(n) && n >= 0 ? n : null;
+    }
+
+    function normalizeQuizItems(quiz) {
+      const rawItems = quiz.items || [];
+      return rawItems.map((item, idx) => {
+        const zh = ZH_TRANSLATIONS[item.id] || {};
+        const at = parseAt(item.at) ?? DEFAULT_TIMINGS[item.id] ?? ((idx + 1) * 25);
+        return {
+          id: item.id || `q${idx + 1}`,
+          idx: idx + 1,
+          at,
+          answer: String(item.answer),
+          prompt: { en: `${idx + 1}. ${item.prompt}`, zh: `${idx + 1}. ${zh.prompt || item.prompt}` },
+          choices: { en: item.choices || [], zh: zh.choices || item.choices || [] },
+          explain: { en: item.explain || "", zh: zh.explain || item.explain || "" }
+        };
+      });
+    }
+
+    function getTimedCheckpoints() {
+      return normalizeQuizItems(activeQuiz).sort((a, b) => a.at - b.at);
+    }
+
+    function getFirstUnansweredBefore(timeSec) {
+      for (const cp of getTimedCheckpoints()) {
+        if (!answeredCheckpoints.has(cp.id) && timeSec >= cp.at) {
+          return cp;
+        }
+      }
+      return null;
+    }
+
+    function safeSeekVideo(video, targetSec) {
+      try {
+        if (video.seekable && video.seekable.length > 0) {
+          const end = video.seekable.end(video.seekable.length - 1);
+          if (end >= targetSec) {
+            video.currentTime = targetSec;
+          }
+        }
+      } catch (_) {}
+    }
+
+    function formatAnswerFeedback(isCorrect, choicesArr, correctIdx, explainText, lang) {
+      if (isCorrect) {
+        return lang === "zh"
+          ? `✓ 正确！${explainText}`
+          : `✓ Correct! ${explainText}`;
+      }
+      const letter = String.fromCharCode(65 + Number(correctIdx));
+      const rightLabel = choicesArr[Number(correctIdx)] || "";
+      return lang === "zh"
+        ? `✗ 错误。正确答案是 ${letter}：「${rightLabel}」。原因：${explainText}`
+        : `✗ Incorrect. The correct answer is ${letter}: "${rightLabel}". Why: ${explainText}`;
+    }
+
+    function applyChoiceHighlights(container, selector, pickedVal, correctVal) {
+      container.querySelectorAll(selector).forEach((lbl, i) => {
+        lbl.classList.remove("is-correct", "is-wrong");
+        if (String(i) === String(correctVal)) {
+          lbl.classList.add("is-correct");
+        } else if (String(i) === String(pickedVal)) {
+          lbl.classList.add("is-wrong");
+        }
+      });
+    }
+
+    function renderCheckpointPills() {
+      const pillsEl = document.getElementById("cp-pills");
+      const cps = getTimedCheckpoints();
+      const firstUnansweredIdx = cps.findIndex(cp => !answeredCheckpoints.has(cp.id));
+
+      pillsEl.innerHTML = cps.map((cp, idx) => {
+        const isDone = answeredCheckpoints.has(cp.id);
+        const isActive = activeCheckpointId === cp.id;
+        const isLocked = firstUnansweredIdx !== -1 && idx > firstUnansweredIdx;
+        const cls = isDone ? "done" : (isActive ? "active" : "");
+        const prefix = isDone ? "✓ " : (isLocked ? "🔒 " : "");
+        return `<button type="button" class="cp-pill ${cls}" data-jump-cp="${cp.id}" ${isLocked ? "disabled" : ""}>${prefix}Q${idx + 1} · ${fmtSec(cp.at)}</button>`;
+      }).join("");
+
+      const progEl = document.getElementById("cp-progress-text");
+      if (progEl) {
+        if (lessonVideoEl && lessonVideoEl.ended && answeredCheckpoints.size === cps.length) {
+          const correctCount = cps.filter(cp => userAnswers[cp.id] === cp.answer).length;
+          const pct = Math.round((correctCount / cps.length) * 100);
+          progEl.textContent = currentLang === "zh"
+            ? `视频已播完 · 检查点得分：${correctCount} / ${cps.length} 题正确（${pct}%）`
+            : `Video finished · Checkpoint score: ${correctCount} / ${cps.length} correct (${pct}%)`;
+        } else {
+          progEl.textContent = currentLang === "zh"
+            ? `必答进度：${answeredCheckpoints.size} / ${cps.length} 已完成（未作答无法跳过或继续）`
+            : `Compulsory progress: ${answeredCheckpoints.size} / ${cps.length} answered (cannot skip without answering)`;
+        }
+      }
+    }
+
+    function openOnVideoCheckpoint(cp) {
+      const video = document.getElementById("lesson-video");
+      const stage = document.getElementById("video-stage");
+      if (document.fullscreenElement === video) {
+        document.exitFullscreen().then(() => stage.requestFullscreen().catch(() => {})).catch(() => {});
+      }
+
+      video.pause();
+      videoCompletedSummaryOpen = false;
+      activeCheckpointId = cp.id;
+      activeCheckpointPausedTime = video.currentTime;
+      renderCheckpointPills();
+
+      const overlay = document.getElementById("video-quiz-overlay");
+      const lang = currentLang === "zh" ? "zh" : "en";
+      const alreadyAnswered = answeredCheckpoints.has(cp.id);
+      const savedChoice = userAnswers[cp.id];
+
+      overlay.hidden = false;
+      overlay.innerHTML = `
+        <div class="vq-modal" role="dialog" aria-modal="true" aria-label="Compulsory Video Checkpoint Quiz">
+          <div class="vq-head">
+            <span class="cp-badge">${lang === "zh" ? `视频检查点 Q${cp.idx} · ${fmtSec(cp.at)}` : `Video Checkpoint Q${cp.idx} · ${fmtSec(cp.at)}`}</span>
+            <span class="cp-required-tag">${lang === "zh" ? "必答题 · 作答后继续" : "Required · Answer to continue"}</span>
+          </div>
+          <p class="vq-prompt">${cp.prompt[lang]}</p>
+          <div class="vq-choices">
+            ${cp.choices[lang].map((label, i) => `
+              <label class="vq-choice">
+                <input type="radio" name="vq-${cp.id}" value="${i}" ${savedChoice === String(i) ? "checked" : ""}>
+                <span><strong>${String.fromCharCode(65 + i)}.</strong> ${label}</span>
+              </label>
+            `).join("")}
+          </div>
+          <div class="controls" style="margin-bottom:0">
+            <button type="button" class="btn btn-pink btn-sm" id="vq-submit">${lang === "zh" ? "提交答案" : "Submit answer"}</button>
+            <button type="button" class="btn btn-green btn-sm" id="vq-resume" ${alreadyAnswered ? "" : "disabled hidden"}>${lang === "zh" ? "继续播放视频 ▶" : "Continue video ▶"}</button>
+          </div>
+          <div class="quiz-result" id="vq-res"></div>
+        </div>
+      `;
+
+      const resumeBtn = document.getElementById("vq-resume");
+      const resBox = document.getElementById("vq-res");
+
+      if (alreadyAnswered && savedChoice !== undefined) {
+        const ok = savedChoice === cp.answer;
+        resBox.className = "quiz-result show " + (ok ? "ok" : "bad");
+        resBox.textContent = formatAnswerFeedback(ok, cp.choices[lang], cp.answer, cp.explain[lang], lang);
+        applyChoiceHighlights(overlay, ".vq-choice", savedChoice, cp.answer);
+      }
+
+      document.getElementById("vq-submit").onclick = () => {
+        const picked = overlay.querySelector("input:checked");
+        resBox.classList.add("show");
+        if (!picked) {
+          resBox.className = "quiz-result show bad";
+          resBox.textContent = lang === "zh" ? "请先选择一个选项，才能继续观看视频。" : "Please select an option before continuing the video.";
+          return;
+        }
+        userAnswers[cp.id] = picked.value;
+        answeredCheckpoints.add(cp.id);
+
+        const ok = picked.value === cp.answer;
+        resBox.className = "quiz-result show " + (ok ? "ok" : "bad");
+        resBox.textContent = formatAnswerFeedback(ok, cp.choices[lang], cp.answer, cp.explain[lang], lang);
+        applyChoiceHighlights(overlay, ".vq-choice", picked.value, cp.answer);
+
+        const bottomRadio = document.querySelector(`.quiz-item[data-id="${cp.id}"] input[value="${picked.value}"]`);
+        if (bottomRadio) bottomRadio.checked = true;
+
+        renderCheckpointPills();
+        resumeBtn.hidden = false;
+        resumeBtn.disabled = false;
+      };
+
+      resumeBtn.onclick = () => {
+        if (!answeredCheckpoints.has(cp.id)) return;
+        activeCheckpointId = null;
+        activeCheckpointPausedTime = null;
+        overlay.hidden = true;
+        renderCheckpointPills();
+        video.play().catch(() => {});
+      };
+    }
+
+    document.getElementById("stage-fullscreen").addEventListener("click", () => {
+      const stage = document.getElementById("video-stage");
+      if (document.fullscreenElement === stage) {
+        document.exitFullscreen().catch(() => {});
+      } else {
+        stage.requestFullscreen().catch(() => {});
+      }
+    });
+
+    document.getElementById("cp-pills").addEventListener("click", e => {
+      const btn = e.target.closest("[data-jump-cp]");
+      if (!btn || btn.disabled) return;
+      const cp = getTimedCheckpoints().find(x => x.id === btn.dataset.jumpCp);
+      if (!cp) return;
+      const video = document.getElementById("lesson-video");
+      video.pause();
+      safeSeekVideo(video, cp.at);
+      openOnVideoCheckpoint(cp);
+    });
+
+    const lessonVideoEl = document.getElementById("lesson-video");
+
+    function enforceCompulsoryCheckpoints() {
+      const cur = lessonVideoEl.currentTime;
+
+      if (activeCheckpointId) {
+        if (!lessonVideoEl.paused) lessonVideoEl.pause();
+        if (activeCheckpointPausedTime !== null && Math.abs(cur - activeCheckpointPausedTime) > 1.25) {
+          safeSeekVideo(lessonVideoEl, activeCheckpointPausedTime);
+        }
+        return;
+      }
+
+      const blockingCp = getFirstUnansweredBefore(cur);
+      if (blockingCp) {
+        lessonVideoEl.pause();
+        if (cur - blockingCp.at > 1.5) {
+          safeSeekVideo(lessonVideoEl, blockingCp.at);
+        }
+        openOnVideoCheckpoint(blockingCp);
+      }
+    }
+
+    function showVideoCompletionSummary() {
+      const cps = getTimedCheckpoints();
+      const total = cps.length;
+      const correctCount = cps.filter(cp => userAnswers[cp.id] === cp.answer).length;
+      const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+      const threshold = activeQuiz.passing_score || 0.80;
+      const passed = total > 0 && (correctCount / total) >= threshold;
+      const lang = currentLang === "zh" ? "zh" : "en";
+
+      videoCompletedSummaryOpen = true;
+      renderCheckpointPills();
+
+      const overlay = document.getElementById("video-quiz-overlay");
+      overlay.hidden = false;
+      overlay.innerHTML = `
+        <div class="vq-modal" role="dialog" aria-modal="true" aria-label="Video Checkpoint Summary">
+          <div class="vq-head">
+            <span class="cp-badge">${lang === "zh" ? "视频播放完成" : "Lesson Video Finished"}</span>
+            <span class="cp-required-tag">${lang === "zh" ? `及格线 ${Math.round(threshold * 100)}%` : `Passing ${Math.round(threshold * 100)}%`}</span>
+          </div>
+          <div class="vq-score-hero ${passed ? "pass" : "fail"}">
+            <div class="vq-score-num">${correctCount} / ${total} (${pct}%)</div>
+            <div style="font-weight:700;font-size:0.95rem;line-height:1.4">
+              ${lang === "zh"
+                ? `你在视频随堂检查点中答对了 <strong>${correctCount} / ${total}</strong> 题（${passed ? "恭喜通过！" : "未达及格线，建议查看下方解析后重测。"}）`
+                : `You got <strong>${correctCount} out of ${total}</strong> checkpoint questions correct (${passed ? "Passed!" : "Below passing score — review explanations below."})`}
+            </div>
+          </div>
+          <div class="vq-breakdown">
+            ${cps.map((cp, idx) => {
+              const ok = userAnswers[cp.id] === cp.answer;
+              return `<span class="vq-qchip ${ok ? "ok" : "bad"}">Q${idx + 1}: ${ok ? "✓" : "✗"}</span>`;
+            }).join("")}
+          </div>
+          <div class="controls" style="margin-bottom:0">
+            <button type="button" class="btn btn-primary btn-sm" id="vq-goto-quiz">${lang === "zh" ? "查看完整测验与解析 ↓" : "Review Full Quiz & Explanations ↓"}</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="vq-rewatch">${lang === "zh" ? "重新观看视频 ↺" : "Rewatch Video ↺"}</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="vq-close-end">${lang === "zh" ? "关闭弹窗" : "Close"}</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("vq-goto-quiz").onclick = () => {
+        videoCompletedSummaryOpen = false;
+        overlay.hidden = true;
+        document.getElementById("quiz").scrollIntoView({ behavior: "smooth" });
+        document.getElementById("score-quiz").click();
+      };
+
+      document.getElementById("vq-rewatch").onclick = () => {
+        videoCompletedSummaryOpen = false;
+        overlay.hidden = true;
+        safeSeekVideo(lessonVideoEl, 0);
+        lessonVideoEl.play().catch(() => {});
+      };
+
+      document.getElementById("vq-close-end").onclick = () => {
+        videoCompletedSummaryOpen = false;
+        overlay.hidden = true;
+      };
+    }
+
+    lessonVideoEl.addEventListener("play", () => {
+      if (videoCompletedSummaryOpen) {
+        videoCompletedSummaryOpen = false;
+        document.getElementById("video-quiz-overlay").hidden = true;
+      }
+      enforceCompulsoryCheckpoints();
+    });
+    lessonVideoEl.addEventListener("seeking", enforceCompulsoryCheckpoints);
+    lessonVideoEl.addEventListener("timeupdate", enforceCompulsoryCheckpoints);
+    lessonVideoEl.addEventListener("ended", () => {
+      const blockingCp = getFirstUnansweredBefore(Infinity);
+      if (blockingCp) {
+        openOnVideoCheckpoint(blockingCp);
+        return;
+      }
+      showVideoCompletionSummary();
+    });
+    setInterval(() => {
+      if (!lessonVideoEl.paused || activeCheckpointId) enforceCompulsoryCheckpoints();
+    }, 200);
+
+    function renderQuiz() {
+      const root = document.getElementById("quiz-root");
+      const saved = { ...userAnswers };
+      root.querySelectorAll(".quiz-item").forEach(el => {
+        const checked = el.querySelector("input:checked");
+        if (checked) saved[el.dataset.id] = checked.value;
+      });
+      const lang = currentLang === "zh" ? "zh" : "en";
+      document.getElementById("quiz-title").textContent = lang === "zh" ? ZH_TRANSLATIONS.title : activeQuiz.title;
+      const items = normalizeQuizItems(activeQuiz);
+      const passPct = Math.round((activeQuiz.passing_score || 0.80) * 100);
+      const passCount = Math.ceil(items.length * (activeQuiz.passing_score || 0.80));
+      document.getElementById("quiz-subtitle").innerHTML = lang === "zh"
+        ? `模块 <code>${activeQuiz.id || "module03-congestion-supply-load"}</code> · 及格线：<strong>${passPct}%</strong>（${passCount} / ${items.length} 题）。`
+        : `Module <code>${activeQuiz.id || "module03-congestion-supply-load"}</code> · Passing score: <strong>${passPct}%</strong> (${passCount} / ${items.length} questions).`;
+
+      root.innerHTML = items.map(q => {
+        const atBadge = `<span class="quiz-at-badge" data-jump-vid="${q.at}" title="Jump video to ${fmtSec(q.at)}">@ ${fmtSec(q.at)}</span>`;
+        const choicesHtml = q.choices[lang].map((label, idx) =>
+          `<label class="quiz-choice">
+            <input type="radio" name="${q.id}" value="${idx}" ${saved[q.id] === String(idx) ? "checked" : ""}>
+            <span><strong>${String.fromCharCode(65 + idx)}.</strong> ${label}</span>
+          </label>`
+        ).join("");
+        return `<div class="quiz-item" data-id="${q.id}" data-answer="${q.answer}" data-explain="${q.explain[lang]}">
+          <p class="quiz-prompt">${q.prompt[lang]}${atBadge}</p>
+          <div class="quiz-choices">${choicesHtml}</div>
+          <button type="button" class="btn btn-ghost" data-check="${q.id}">${lang === "zh" ? "检查本题" : "Check answer"}</button>
+          <div class="quiz-result"></div>
+        </div>`;
+      }).join("");
+
+      gradedQuizIds.forEach(qid => {
+        const el = root.querySelector(`.quiz-item[data-id="${qid}"]`);
+        if (el && el.querySelector("input:checked")) gradeOne(el);
+      });
+    }
+
+    function gradeOne(item) {
+      const picked = item.querySelector("input:checked");
+      const res = item.querySelector(".quiz-result");
+      const lang = currentLang === "zh" ? "zh" : "en";
+      res.classList.add("show");
+      if (!picked) {
+        res.className = "quiz-result show bad";
+        res.textContent = lang === "zh" ? "请先选择一个选项。" : "Please select an option first.";
+        return false;
+      }
+      const qid = item.dataset.id;
+      userAnswers[qid] = picked.value;
+      gradedQuizIds.add(qid);
+
+      const qObj = normalizeQuizItems(activeQuiz).find(x => x.id === qid);
+      const choicesArr = qObj ? qObj.choices[lang] : [];
+      const ok = picked.value === item.dataset.answer;
+
+      res.className = "quiz-result show " + (ok ? "ok" : "bad");
+      res.textContent = formatAnswerFeedback(ok, choicesArr, item.dataset.answer, item.dataset.explain, lang);
+      applyChoiceHighlights(item, ".quiz-choice", picked.value, item.dataset.answer);
+      return ok;
+    }
+
+    document.getElementById("quiz-root").addEventListener("click", e => {
+      const id = e.target.dataset.check;
+      if (id) gradeOne(document.querySelector(`.quiz-item[data-id="${id}"]`));
+      const atSec = e.target.dataset.jumpVid;
+      if (atSec !== undefined) {
+        const targetSec = Number(atSec);
+        const blockingCp = getFirstUnansweredBefore(targetSec);
+        const cpToOpen = blockingCp || getTimedCheckpoints().find(x => x.at === targetSec);
+        document.getElementById("video-stage").scrollIntoView({ behavior: "smooth", block: "center" });
+        if (cpToOpen) {
+          lessonVideoEl.pause();
+          safeSeekVideo(lessonVideoEl, cpToOpen.at);
+          openOnVideoCheckpoint(cpToOpen);
+        }
+      }
+    });
+
+    document.getElementById("score-quiz").addEventListener("click", () => {
+      const items = document.querySelectorAll(".quiz-item");
+      let ok = 0;
+      items.forEach(it => { if (gradeOne(it)) ok++; });
+      const ratio = ok / items.length;
+      const threshold = activeQuiz.passing_score || 0.80;
+      const passed = ratio >= threshold;
+      const pct = Math.round(ratio * 100);
+      const sum = document.getElementById("quiz-summary");
+      sum.classList.add("show");
+      sum.style.background = passed ? "#D7F7E8" : "#FFE1EC";
+      sum.style.color = passed ? "#136B44" : "#9E1B4B";
+      sum.textContent = currentLang === "zh"
+        ? `得分：${ok} / ${items.length}（${pct}%）— ${passed ? "通过！" : "未达到及格线，请复习后重试。"}`
+        : `Score: ${ok} / ${items.length} (${pct}%) — ${passed ? "Passed!" : "Below passing threshold. Review and retry."}`;
+    });
+
+    (async () => {
+      for (const url of ["lesson/quiz.json", "quiz.json", localFileUrl(COURSE_ID, MODULE_DIR, "quiz.json")]) {
+        try {
+          const r = await fetch(url, { cache: "no-cache" });
+          if (r.ok) {
+            const loaded = await r.json();
+            if (loaded && Array.isArray(loaded.items) && loaded.items.length > 0) {
+              activeQuiz = loaded;
+            }
+            break;
+          }
+        } catch (_) {}
+      }
+      renderQuiz();
+      renderCheckpointPills();
+    })();
+  </script>
+  <script>
+    (async function initSlidesPdf() {
+      const candidates = [
+        "lesson/slides.pdf",
+        "slides.pdf",
+        localFileUrl(COURSE_ID, MODULE_DIR, "slides.pdf"),
+        cdnFileUrl("slides.pdf")
+      ];
+      const dlBtn = document.getElementById("slides-dl-btn");
+      const viewBtn = document.getElementById("slides-view-btn");
+    
+      for (const url of candidates) {
+        try {
+          const r = await fetch(url, { method: "HEAD", cache: "no-cache" });
+          if (r.ok) {
+            dlBtn.href = url;
+            viewBtn.href = url;
+            break;
+          }
+        } catch (_) {}
+      }
+    
+      document.querySelectorAll("[data-ui-lang]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const zh = btn.dataset.uiLang === "zh";
+          document.getElementById("slides-title").textContent = zh ? "课程讲义 (PDF)" : "Lesson Slides (PDF)";
+          document.getElementById("slides-sub").textContent = zh ? "下载视频配套幻灯片，方便离线复习。" : "Download the slide deck from the video for offline review.";
+          dlBtn.textContent = zh ? "⬇ 下载 PDF" : "⬇ Download PDF";
+          viewBtn.textContent = zh ? "新标签页预览 ↗" : "Open in Tab ↗";
+        });
+      });
+    })();
+    </script>
+</body>
+</html>

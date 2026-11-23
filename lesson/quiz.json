@@ -1,0 +1,76 @@
+{
+  "id": "module03-congestion-supply-load",
+  "title": "Supply and load check",
+  "items": [
+    {
+      "id": "capacity-demand-q1",
+      "at": 39,
+      "type": "mcq",
+      "prompt": "In this lesson, what is checked for every GCell (tile) to find congestion?",
+      "choices": [
+        "Detailed maze routing with rip-up",
+        "Whether demand is larger than capacity",
+        "Abacus row packing",
+        "Liberty timing arcs"
+      ],
+      "answer": 1,
+      "explain": "Each tile compares the wires wanting to pass (demand) with the wires it can hold (capacity). Maze routing, row packing and timing arcs belong to other lessons."
+    },
+    {
+      "id": "capacity-demand-q2",
+      "at": 55,
+      "type": "mcq",
+      "prompt": "How is surplus (and overflow) calculated for a GCell?",
+      "choices": [
+        "demand × capacity",
+        "HPWL only",
+        "surplus = demand − capacity; overflow when it is above 0",
+        "It is always zero after legalization"
+      ],
+      "answer": 2,
+      "explain": "surplus = demand − capacity. A positive surplus means the tile is oversubscribed; the overflow is max(0, demand − capacity)."
+    },
+    {
+      "id": "capacity-demand-q3",
+      "at": 70,
+      "type": "mcq",
+      "prompt": "Capacity is 2.0. A tile has demand 2.0. Is it oversubscribed?",
+      "choices": [
+        "Yes, because demand equals capacity",
+        "No, it is exactly full: surplus is 0, not above 0",
+        "Yes, because surplus is positive",
+        "It depends on the neighbours only"
+      ],
+      "answer": 1,
+      "explain": "Oversubscribed means surplus > 0 (strictly greater). Exactly full is still OK."
+    },
+    {
+      "id": "capacity-demand-q4",
+      "at": 94,
+      "type": "mcq",
+      "prompt": "With capacity 2.0, demands are 1.4, 2.0, 2.6 and 3.0. How many tiles are oversubscribed?",
+      "choices": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "answer": 1,
+      "explain": "Only 2.6 (+0.6) and 3.0 (+1.0) are above 2.0; 2.0 is full (surplus 0), not over."
+    },
+    {
+      "id": "capacity-demand-q5",
+      "at": 136,
+      "type": "mcq",
+      "prompt": "You lower Cap from 2.0 to 1.0 but keep the same wires and tiles. What usually happens?",
+      "choices": [
+        "More tiles become oversubscribed",
+        "Fewer tiles become oversubscribed",
+        "Nothing changes",
+        "Demand automatically drops"
+      ],
+      "answer": 0,
+      "explain": "Demand is unchanged but the budget is smaller, so borderline tiles flip to hot. Always say which Cap you used."
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Promise.all([document.fonts.load("700 30px P"),document.fonts.load("500 30px P"),document.fonts.load("400 30px L"),document.fonts.load("700 30px L"),document.fonts.load("700 30px M")])

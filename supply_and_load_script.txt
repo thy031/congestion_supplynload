@@ -1,0 +1,27 @@
+Welcome! Today we ask one simple question: is there enough room for all the wires on a chip?
+Imagine the chip is a city. Every wire is a car, and each tile of the grid is one city block.
+Start with one block. This road has 2 lanes. Two lanes is its capacity.
+Wires arrive like cars. Car 1 fits. Car 2 fits. Now the road is full.
+Car 3 has no lane! Demand is 3, capacity is 2, so 3 − 2 = +1. That is a traffic jam.
+Real chips are cut into a grid of tiles called GCells. Each one keeps two numbers: demand and capacity.
+This tile holds cells A to F. Its demand is 3.5 but its capacity is only 2.0, so it is oversubscribed.
+Picture each tile as a bucket. Capacity is the line the water must not cross.
+Demand 1.0: plenty of room. Demand 2.0: full. Demand 3.2: it spills over!
+surplus = demand − capacity. Zero or below is safe. Above zero means overflow.
+Now check the whole chip. We visit every tile and work out its surplus.
+Most tiles stay calm and blue. One tile turns yellow: 3.5 − 2.0 = +1.5.
+Before you trust a heat map, list the oversubscribed tiles. Here there is just one.
+What if the road gets narrower? Capacity is a knob, so let's turn it from 2.0 down to 1.0.
+Same wires, same tiles. Watch the borderline tiles turn yellow one by one.
+Lower capacity means more traffic jams. That is why capacity is part of the contract.
+Your turn! Capacity is 2.0. Demands are 1.4, 2.0, 2.6 and 3.0.
+How many are oversubscribed? Think for three seconds.
+Two! 2.6 and 3.0 are over. 2.0 is full, not over.
+In code it is just three lines: work out the surplus, keep tiles above zero, count them.
+Notice the strict “greater than”. A tile that is exactly full is not oversubscribed.
+Watch out for three beginner traps.
+One: compare wires with wires. Write your units down.
+Two: a zero tile beside hot tiles is not automatically safe.
+Three: reset the starter placement when you change capacity.
+Great job! You can compute surplus, spot hot tiles and explain why capacity matters.
+Up next: RUDY, the quick estimator that predicts demand from the nets' bounding boxes.

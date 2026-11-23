@@ -1,0 +1,86 @@
+WEBVTT
+
+00:00.000 --> 00:05.760
+Welcome. Today we ask one simple question. Is there enough room for all the wires on a chip?
+
+00:06.720 --> 00:12.800
+Imagine the chip is a city. Every wire is a car, and each tile of the grid is one city block.
+
+00:13.840 --> 00:19.840
+Start with one block. This road has two lanes. Two lanes is its capacity.
+
+00:20.800 --> 00:28.240
+Wires arrive like cars. Car 1 fits. Car 2 fits. Now the road is full.
+
+00:29.200 --> 00:36.160
+Car 3 has no lane. Demand is 3, capacity is 2, so 3 minus 2 is equal to plus 1.
+
+00:37.120 --> 00:42.160
+That is a traffic jam. Real chips are cut into a grid of tiles called G cells.
+
+00:43.120 --> 00:48.640
+Each one keeps two numbers, demand and capacity. This tile holds cells A to F.
+
+00:49.600 --> 00:55.040
+Its demand is 3.5 but its capacity is only 2.0, so it is oversubscribed.
+
+00:56.000 --> 01:01.040
+Picture each tile as a bucket. Capacity is the line the water must not cross.
+
+01:02.080 --> 01:10.800
+Demand 1.0, plenty of room. Demand 2.0, full. Demand 3.2, it spills over.
+
+01:11.760 --> 01:16.480
+Surplus equals demand minus capacity. Zero or below is safe.
+
+01:17.520 --> 01:21.200
+Above zero means overflow. Now check the whole chip.
+
+01:22.160 --> 01:27.120
+We visit every tile and work out its surplus. Most tiles stay common blue.
+
+01:28.160 --> 01:33.520
+One tile turns yellow, 3.5 minus 2.0 is equal to plus 1.5.
+
+01:34.480 --> 01:37.760
+Before you trust a heat map, list the oversubscribed tiles.
+
+01:38.800 --> 01:42.320
+Here there is just one. What if the road gets narrower?
+
+01:43.280 --> 01:47.680
+Capacity is a knob, so let's turn it from 2.0 down to 1.0.
+
+01:48.640 --> 01:54.080
+Same wires, same tiles. Watch the borderline tiles turn yellow one by one.
+
+01:55.120 --> 02:00.720
+Lower capacity means more traffic jams. That is why capacity is part of the contract.
+
+02:01.680 --> 02:10.880
+Your turn. Capacity is 2.0. Demands are 1.4, 2.0, 2.6 and 3.0.
+
+02:11.840 --> 02:15.440
+How many are oversubscribed? Think for 3 seconds.
+
+02:16.400 --> 02:23.200
+2. 2.6 and 3.0 are over. 2.0 is full, not over.
+
+02:24.160 --> 02:29.440
+Encoded is just three lines. Work out the surplus, keep tiles above zero, count them.
+
+02:30.400 --> 02:35.680
+Notice the strict greater than. A tile that is exactly full is not oversubscribed.
+
+02:36.640 --> 02:41.520
+Watch out for three beginner traps. 1. Compare wires with wires.
+
+02:42.480 --> 02:48.480
+Write your units down. 2. A zero tile beside hot tiles is not automatically safe.
+
+02:49.520 --> 02:52.640
+3. Reset the starter placement when you change capacity.
+
+02:53.600 --> 02:56.240
+Great job. You can compute surplus-
+
